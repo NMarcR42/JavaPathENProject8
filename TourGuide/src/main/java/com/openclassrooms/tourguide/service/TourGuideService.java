@@ -1,5 +1,6 @@
 package com.openclassrooms.tourguide.service;
 
+import com.openclassrooms.tourguide.dto.NearbyAttractionDTO;
 import com.openclassrooms.tourguide.helper.InternalTestHelper;
 import com.openclassrooms.tourguide.tracker.Tracker;
 import com.openclassrooms.tourguide.user.User;
@@ -8,6 +9,7 @@ import com.openclassrooms.tourguide.user.UserReward;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -94,8 +96,10 @@ public class TourGuideService {
 		rewardsService.calculateRewards(user);
 		return visitedLocation;
 	}
-
-	public List<Attraction> getNearByAttractions(VisitedLocation visitedLocation) {
+	
+	// renvoie les attractions les plus proches 
+	// Avant
+	/*public List<Attraction> getNearByAttractions(VisitedLocation visitedLocation) {
 		List<Attraction> nearbyAttractions = new ArrayList<>();
 		for (Attraction attraction : gpsUtil.getAttractions()) {
 			if (rewardsService.isWithinAttractionProximity(attraction, visitedLocation.location)) {
@@ -104,7 +108,29 @@ public class TourGuideService {
 		}
 
 		return nearbyAttractions;
+	}*/
+	
+	//Après
+	public List<NearbyAttractionDTO> getNearbyAttractionsWithDetails(VisitedLocation visitedLocation, User user) {
+	    Location userLoc = visitedLocation.location;
+
+	    return gpsUtil.getAttractions().stream()
+	            .map(a -> {
+	                double distance = rewardsService.getDistance(userLoc, new Location(a.latitude, a.longitude));
+	                int points = rewardsService.getRewardPoints(a, user);
+	                return new NearbyAttractionDTO(
+	                        a.attractionName,
+	                        new Location(a.latitude, a.longitude),
+	                        userLoc,
+	                        distance,
+	                        points
+	                );
+	            })
+	            .sorted(Comparator.comparingDouble(NearbyAttractionDTO::getDistance))
+	            .limit(5)
+	            .collect(Collectors.toList());
 	}
+	
 
 	private void addShutDownHook() {
 		Runtime.getRuntime().addShutdownHook(new Thread() {

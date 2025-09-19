@@ -1,5 +1,6 @@
 package com.openclassrooms.tourguide.service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
@@ -38,17 +39,20 @@ public class RewardsService {
 	
 	public void calculateRewards(User user) {
 		List<VisitedLocation> userLocations = user.getVisitedLocations();
-		List<Attraction> attractions = gpsUtil.getAttractions();
-		
-		for(VisitedLocation visitedLocation : userLocations) {
-			for(Attraction attraction : attractions) {
-				if(user.getUserRewards().stream().filter(r -> r.attraction.attractionName.equals(attraction.attractionName)).count() == 0) {
-					if(nearAttraction(visitedLocation, attraction)) {
-						user.addUserReward(new UserReward(visitedLocation, attraction, getRewardPoints(attraction, user)));
-					}
-				}
-			}
-		}
+	    List<Attraction> attractions = gpsUtil.getAttractions();
+
+	    for (VisitedLocation visitedLocation : userLocations) {  // <-- la CME peut être ici
+	        for (Attraction attraction : attractions) {
+	            boolean alreadyRewarded = user.getUserRewards().stream()
+	                .anyMatch(r -> r.attraction.attractionName.equals(attraction.attractionName));
+
+	            if (!alreadyRewarded && nearAttraction(visitedLocation, attraction)) {
+	                user.addUserReward(
+	                    new UserReward(visitedLocation, attraction, getRewardPoints(attraction, user))
+	                );
+	            }
+	        }
+	    }
 	}
 	
 	public boolean isWithinAttractionProximity(Attraction attraction, Location location) {
@@ -59,7 +63,7 @@ public class RewardsService {
 		return getDistance(attraction, visitedLocation.location) > proximityBuffer ? false : true;
 	}
 	
-	private int getRewardPoints(Attraction attraction, User user) {
+	public int getRewardPoints(Attraction attraction, User user) {
 		return rewardsCentral.getAttractionRewardPoints(attraction.attractionId, user.getUserId());
 	}
 	
