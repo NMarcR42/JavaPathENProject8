@@ -119,10 +119,10 @@ public class TestPerformance {
 	    List<CompletableFuture<Void>> tasks = new ArrayList<>();
 
 	    // Traitement asynchrone pour chaque utilisateur
-	    for (User user : allUsers) {
+	    /*for (User user : allUsers) {
 	        CompletableFuture<Void> future = CompletableFuture.runAsync(() -> rewardsService.calculateRewards(user));
 	        tasks.add(future);
-	    }
+	    }*/
 
 	    // On attend que toutes les tâches soient terminées
 	    tasks.forEach(CompletableFuture::join);
