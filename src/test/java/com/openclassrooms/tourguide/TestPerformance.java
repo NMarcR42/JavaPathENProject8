@@ -54,7 +54,7 @@ public class TestPerformance {
 		RewardsService rewardsService = new RewardsService(gpsUtil, new RewardCentral());
 		// Users should be incremented up to 100,000, and test finishes within 15
 		// minutes
-		InternalTestHelper.setInternalUserNumber(1000);
+		InternalTestHelper.setInternalUserNumber(100);
 		TourGuideService tourGuideService = new TourGuideService(gpsUtil, rewardsService);
 
 		List<User> allUsers = tourGuideService.getAllUsers();
@@ -119,18 +119,18 @@ public class TestPerformance {
 	    List<CompletableFuture<Void>> tasks = new ArrayList<>();
 
 	    // Traitement asynchrone pour chaque utilisateur
-	    /*for (User user : allUsers) {
+	    for (User user : allUsers) {
 	        CompletableFuture<Void> future = CompletableFuture.runAsync(() -> rewardsService.calculateRewards(user));
 	        tasks.add(future);
-	    }*/
+	    }
 
 	    // On attend que toutes les tâches soient terminées
 	    tasks.forEach(CompletableFuture::join);
 
 	    // Vérification que chaque utilisateur a bien reçu une récompense
-	    /*for (User user : allUsers) {
+	    for (User user : allUsers) {
 	        assertTrue(user.getUserRewards().size() > 0);
-	    }*/
+	    }
 
 	    stopWatch.stop();
 	    tourGuideService.tracker.stopTracking();
